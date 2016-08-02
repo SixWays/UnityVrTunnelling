@@ -9,4 +9,4 @@ Just attach to a camera and link the Ref Transform field to the player's vehicle
 Note that Tunnelling.shader must be in the Resources folder, or the shader will work in editor but not in builds.
 
 ## Example
-![Tunnelling in Sublevel Zero](https://googledrive.com/host/0B0MNSuy4MpJWa0I2X1FTMkg0RG8/tunnelling.gif)
+![Tunnelling in Sublevel Zero](https://gifyu.com/images/tunnelling.gif)
