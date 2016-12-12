@@ -33,12 +33,19 @@
 			}
 			
 			sampler2D _MainTex;
+			float4 _MainTex_ST;
 			float _AV;
 			float _Feather;
 
 			fixed4 frag (v2f i) : SV_Target {
-				fixed4 col = tex2D(_MainTex, i.uv);
-				float2 coords = (i.uv - 0.5) * 2;
+				#if UNITY_SINGLE_PASS_STEREO
+				float2 uv = UnityStereoScreenSpaceUVAdjust(i.uv, _MainTex_ST);
+				#else
+				float2 uv = i.uv;
+				#endif
+				fixed4 col = tex2D(_MainTex, uv);
+
+				float2 coords = (uv - 0.5) * 2;
 				float radius = length(coords) / 1.414214;
 				float avMin = (1 - _AV) - _Feather;
 				float avMax = (1 - _AV) + _Feather;
