@@ -23,6 +23,18 @@ namespace Sigtrap.ImageEffects {
 		[Tooltip("At/above this angular velocity, effect will be maxed out.\nDegrees per second")]
 		public float maxAngVel = 180f;
 
+		/// <summary>
+		/// Below this speed, effect will not kick in.
+		/// </summary>
+		[Tooltip("Below this speed, effect will not kick in.")]
+		public float minSpeed = 0f;
+
+		/// <summary>
+		/// At/above this speed, effect will be maxed out.
+		/// </summary>
+		[Tooltip("At/above this speed, effect will be maxed out.")]
+		public float maxSpeed = 3f;
+
 		[Header("Effect Settings")]
 		/// <summary>
 		/// Screen coverage at max angular velocity.
@@ -55,6 +67,7 @@ namespace Sigtrap.ImageEffects {
 
 		#region Misc Fields
 		private Vector3 _lastFwd;
+		private Vector3 _lastPos;
 		private Material _m;
 		#endregion
 
@@ -77,12 +90,23 @@ namespace Sigtrap.ImageEffects {
 			av = Mathf.Clamp01(av);
 			av *= maxEffect;
 
+			Vector3 pos = refTransform.position;
+			float speed = (pos - _lastPos).magnitude / Time.deltaTime;
+
+			speed = (speed - minSpeed) / (maxSpeed - minSpeed);
+			speed = Mathf.Clamp01(speed);
+			speed *= maxEffect;
+
+			if (speed > av) 
+				av = speed;
+
 			_av = Mathf.SmoothDamp(_av, av, ref _avSlew, smoothTime);
 
 			_m.SetFloat(_propAV, _av);
 			_m.SetFloat(_propFeather, feather);
 
 			_lastFwd = fwd;
+			_lastPos = pos;
 		}
 
 		void OnRenderImage(RenderTexture src, RenderTexture dest){
