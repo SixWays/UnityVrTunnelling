@@ -32,8 +32,8 @@ namespace Sigtrap.ImageEffects {
 		/// <summary>
 		/// At/above this speed, effect will be maxed out.
 		/// </summary>
-		[Tooltip("At/above this speed, effect will be maxed out.")]
-		public float maxSpeed = 3f;
+		[Tooltip("At/above this speed, effect will be maxed out.\nSet negative for no effect.")]
+		public float maxSpeed = -1f;
 
 		[Header("Effect Settings")]
 		/// <summary>
@@ -87,18 +87,19 @@ namespace Sigtrap.ImageEffects {
 			Vector3 fwd = refTransform.forward;
 			float av = Vector3.Angle(_lastFwd, fwd) / Time.deltaTime;
 			av = (av - minAngVel) / (maxAngVel - minAngVel);
-			av = Mathf.Clamp01(av);
-			av *= maxEffect;
 
 			Vector3 pos = refTransform.position;
-			float speed = (pos - _lastPos).magnitude / Time.deltaTime;
 
-			speed = (speed - minSpeed) / (maxSpeed - minSpeed);
-			speed = Mathf.Clamp01(speed);
-			speed *= maxEffect;
+			if (maxSpeed > 0) {
+				float speed = (pos - _lastPos).magnitude / Time.deltaTime;
+				speed = (speed - minSpeed) / (maxSpeed - minSpeed);
 
-			if (speed > av) 
-				av = speed;
+				if (speed > av) {
+					av = speed;
+				}
+			}
+
+			av = Mathf.Clamp01(av) * maxEffect;
 
 			_av = Mathf.SmoothDamp(_av, av, ref _avSlew, smoothTime);
 
