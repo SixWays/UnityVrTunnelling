@@ -106,6 +106,7 @@ namespace Sigtrap.ImageEffects {
 			_m.SetFloat(_propFeather, feather);
 
 			_lastFwd = fwd;
+			_lastPos = pos;
 		}
 
 		void OnRenderImage(RenderTexture src, RenderTexture dest){
