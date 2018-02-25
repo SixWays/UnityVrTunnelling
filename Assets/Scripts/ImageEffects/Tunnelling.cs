@@ -2,8 +2,12 @@
 using System.Collections;
 
 namespace Sigtrap.ImageEffects {
+	[RequireComponent(typeof(Camera))]
 	public class Tunnelling : MonoBehaviour {
 		#region Public Fields
+		[Tooltip("Remove for plain black effect.")]
+		public Cubemap skybox;
+
 		[Header("Angular Velocity")]
 		/// <summary>
 		/// Angular velocity calculated for this Transform. DO NOT USE HMD!
@@ -65,10 +69,16 @@ namespace Sigtrap.ImageEffects {
 		private int _propFeather;
 		#endregion
 
+		#region Eye matrices
+		Matrix4x4[] _eyeToWorld = new Matrix4x4[2];
+		Matrix4x4[] _eyeProjection = new Matrix4x4[2];
+		#endregion
+
 		#region Misc Fields
 		private Vector3 _lastFwd;
 		private Vector3 _lastPos;
 		private Material _m;
+		private Camera _cam;
 		#endregion
 
 		#region Messages
@@ -81,6 +91,8 @@ namespace Sigtrap.ImageEffects {
 
 			_propAV = Shader.PropertyToID("_AV");
 			_propFeather = Shader.PropertyToID("_Feather");
+
+			_cam = GetComponent<Camera>();
 		}
 
 		void Update(){
@@ -108,6 +120,45 @@ namespace Sigtrap.ImageEffects {
 
 			_lastFwd = fwd;
 			_lastPos = pos;
+		}
+
+		void OnPreRender(){
+			// Update eye matrices
+			Matrix4x4 local;
+			#if UNITY_2017_2_OR_NEWER
+			if (UnityEngine.XR.XRSettings.enabled) {
+			#else
+			if (UnityEngine.VR.VRSettings.enabled) {
+			#endif
+				local = _cam.transform.parent.worldToLocalMatrix;
+			} else {
+				local = Matrix4x4.identity;
+			}
+
+			_eyeProjection[0] = _cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left);
+			_eyeProjection[1] = _cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right);
+			_eyeProjection[0] = GL.GetGPUProjectionMatrix(_eyeProjection[0], true).inverse;
+			_eyeProjection[1] = GL.GetGPUProjectionMatrix(_eyeProjection[1], true).inverse;
+			
+			_eyeProjection[0][1, 1] *= -1f;
+			_eyeProjection[1][1, 1] *= -1f;
+
+			_eyeToWorld[0] = _cam.GetStereoViewMatrix(Camera.StereoscopicEye.Left);
+			_eyeToWorld[1] = _cam.GetStereoViewMatrix(Camera.StereoscopicEye.Right);
+
+			_eyeToWorld[0] = local * _eyeToWorld[0].inverse;
+			_eyeToWorld[1] = local * _eyeToWorld[1].inverse;
+
+			_m.SetMatrixArray("_EyeProjection", _eyeProjection);
+			_m.SetMatrixArray("_EyeToWorld", _eyeToWorld);
+
+			// Update skybox
+			if (skybox){
+				_m.SetTexture("_Skybox", skybox);
+				_m.EnableKeyword("TUNNEL_SKYBOX");
+			} else {
+				_m.DisableKeyword("TUNNEL_SKYBOX");
+			}
 		}
 
 		void OnRenderImage(RenderTexture src, RenderTexture dest){
