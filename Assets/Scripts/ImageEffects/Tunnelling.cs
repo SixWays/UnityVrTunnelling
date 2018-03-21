@@ -143,6 +143,10 @@ namespace Sigtrap.ImageEffects {
 			_eyeProjection[0][1, 1] *= -1f;
 			_eyeProjection[1][1, 1] *= -1f;
 
+			// Hard-code far clip
+			_eyeProjection[0][3, 3] = 0.001f;
+			_eyeProjection[1][3, 3] = 0.001f;
+
 			_eyeToWorld[0] = _cam.GetStereoViewMatrix(Camera.StereoscopicEye.Left);
 			_eyeToWorld[1] = _cam.GetStereoViewMatrix(Camera.StereoscopicEye.Right);
 
