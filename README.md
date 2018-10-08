@@ -1,6 +1,11 @@
 # UnityVrTunnelling
 Simple Unity implementation of *Tunnelling* for VR - dynamic reduction of FOV to combat sim-sickness
 
+## DEPRECATED
+This package is now deprecated - our advanced plugin [VR Tunnelling Pro is now open source](https://github.com/sigtrapgames/VrTunnellingPro-Unity) and is strongly recommended over this repo.
+
+## Tunnelling
+
 *Tunnelling*, as seen in Ubisoft's Eagle Flight, is dynamic vignetting to reduce FOV in VR while rotating. This reduces perceived motion for players and can be highly effective in reducing sim-sickness.
 
 ## Use
